@@ -64,7 +64,7 @@ class Api {
       // crude stoppage attempt
       let response = await httpClient.get(endpoint, queryParams);
       if (lastReponse) {
-        if (JSON.stringify(lastReponse) == JSON.stringify(response)) {
+        if (safeStringify(lastReponse) == safeStringify(response)) {
           break;
         }
       }
@@ -810,6 +810,22 @@ function IsJsonString(str) {
     return false;
   }
   return true;
+}
+
+function safeStringify(obj) {
+  let cache = [];
+  let str = JSON.stringify(obj, function (key, value) {
+    if (typeof value === "object" && value !== null) {
+      if (cache.indexOf(value) !== -1) {
+        // Circular reference, discard the key.
+        return;
+      }
+      cache.push(value);
+    }
+    return value;
+  });
+
+  return str;
 }
 
 module.exports.Api = Api;
