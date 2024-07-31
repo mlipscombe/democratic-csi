@@ -836,12 +836,14 @@ class FreeNASApiDriver extends CsiBaseDriver {
                 target
               );
 
-              // 409 or 422 if invalid
+              // 409 if invalid
               if (response.statusCode != 201) {
                 target = null;
                 if (
-                  (response.statusCode == 409 || response.statusCode == 422) &&
-                  JSON.stringify(response.body).includes("already exists")
+                  response.statusCode == 409 &&
+                  JSON.stringify(response.body).includes(
+                    "Target name already exists"
+                  )
                 ) {
                   target = await httpApiClient.findResourceByProperties(
                     "/services/iscsi/target",
@@ -1127,9 +1129,7 @@ class FreeNASApiDriver extends CsiBaseDriver {
                 target = null;
                 if (
                   response.statusCode == 422 &&
-                  JSON.stringify(response.body).includes(
-                    "Target name already exists"
-                  )
+                  JSON.stringify(response.body).includes("already exists")
                 ) {
                   target = await httpApiClient.findResourceByProperties(
                     "/iscsi/target",
