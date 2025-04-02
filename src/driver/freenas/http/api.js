@@ -161,13 +161,7 @@ class Api {
   }
 
   async getIsScale() {
-    const systemVersion = await this.getSystemVersion();
-
-    if (systemVersion.v2 && systemVersion.v2.toLowerCase().includes("scale")) {
-      return true;
-    }
-
-    return false;
+    return true;
   }
 
   async getSystemVersionMajorMinor() {
