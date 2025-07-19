@@ -27,6 +27,22 @@ const FREENAS_ISCSI_ASSETS_NAME_PROPERTY_NAME =
 const FREENAS_SYSTEM_VERSION_CACHE_KEY = "freenas:system_version";
 const __REGISTRY_NS__ = "FreeNASSshDriver";
 
+function safeStringify(obj) {
+  let cache = [];
+  let str = JSON.stringify(obj, function (key, value) {
+    if (typeof value === "object" && value !== null) {
+      if (cache.indexOf(value) !== -1) {
+        // Circular reference, discard the key.
+        return;
+      }
+      cache.push(value);
+    }
+    return value;
+  });
+
+  return str;
+}
+
 class FreeNASSshDriver extends ControllerZfsBaseDriver {
   /**
    * Ensure sane options are used etc
@@ -199,7 +215,7 @@ class FreeNASSshDriver extends ControllerZfsBaseDriver {
       // crude stoppage attempt
       let response = await httpClient.get(endpoint, queryParams);
       if (lastReponse) {
-        if (JSON.stringify(lastReponse) == JSON.stringify(response)) {
+        if (safeStringify(lastReponse) == safeStringify(response)) {
           break;
         }
       }
@@ -1201,14 +1217,12 @@ class FreeNASSshDriver extends ControllerZfsBaseDriver {
 
               response = await httpClient.post("/iscsi/target", target);
 
-              // 409 if invalid
+              // 422 if invalid
               if (response.statusCode != 200) {
                 target = null;
                 if (
                   response.statusCode == 422 &&
-                  JSON.stringify(response.body).includes(
-                    "Target name already exists"
-                  )
+                  JSON.stringify(response.body).includes("already exists")
                 ) {
                   target = await this.findResourceByProperties(
                     "/iscsi/target",

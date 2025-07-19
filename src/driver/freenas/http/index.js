@@ -10,10 +10,8 @@ class Client {
     this.options = JSON.parse(JSON.stringify(options));
     this.logger = console;
 
-    // default to v1.0 for now
-    if (!this.options.apiVersion) {
-      this.options.apiVersion = 2;
-    }
+    // default to v2.0 for now
+    this.options.apiVersion = 2;
   }
 
   getHttpAgent() {
@@ -61,7 +59,7 @@ class Client {
       host: server.host,
       port: server.port,
       //userinfo: server.username + ":" + server.password,
-      path: server.apiVersion == 1 ? "/api/v1.0" : "/api/v2.0",
+      path: "/api/v2.0",
     };
     return URI.serialize(options);
   }
@@ -85,7 +83,7 @@ class Client {
       responseType: "json",
       httpAgent: this.getHttpAgent(),
       httpsAgent: this.getHttpsAgent(),
-      timeout: 60 * 1000,
+      timeout: 120 * 1000,
       validateStatus: function (status) {
         if (status >= 500) {
           return false;
